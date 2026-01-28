@@ -77,6 +77,19 @@ Key topics:
 - Chart-based visualization
 - Report deployment to SSRS Report Server
 
+**5. Analytics & Semantic Layer – SSAS Tabular & KPI Reporting**
+
+Folder: analytics-tabular-reporting
+
+This section implements the analytical and semantic layer on top of the database using SQL Server Analysis Services (SSAS) Tabular. It demonstrates how relational data is transformed into business-ready measures, KPIs and analytical views.
+
+Key topics:
+- SSAS Tabular model design
+- DAX measures and calculations
+- Business KPIs with thresholds
+- Analytical perspectives (IT Management / Operations)
+- Excel-based reporting on SSAS
+
 **Purpose of the Lab**
 
 This lab was built to:

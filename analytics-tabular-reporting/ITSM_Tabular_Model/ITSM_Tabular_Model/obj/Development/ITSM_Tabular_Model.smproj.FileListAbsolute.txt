@@ -1,0 +1,8 @@
+D:\Enterprise-SQL-Lab\analytics-tabular-reporting\ITSM_Tabular_Model\ITSM_Tabular_Model\bin\Model.asdatabase
+D:\Enterprise-SQL-Lab\analytics-tabular-reporting\ITSM_Tabular_Model\ITSM_Tabular_Model\bin\Model.deploymenttargets
+D:\Enterprise-SQL-Lab\analytics-tabular-reporting\ITSM_Tabular_Model\ITSM_Tabular_Model\bin\Model.deploymentoptions
+D:\Enterprise-SQL-Lab\analytics-tabular-reporting\ITSM_Tabular_Model\ITSM_Tabular_Model\obj\Development\ITSM_Tabular_Model.smproj.AssemblyReference.cache
+D:\Enterprise-SQL-Lab\analytics-tabular-reporting\ITSM_Tabular_Model\ITSM_Tabular_Model\obj\Development\ITSM_Tabular_Model.smproj.CoreCompileInputs.cache
+D:\Enterprise-SQL-Lab\analytics-tabular-reporting\ITSM_Tabular_Model\ITSM_Tabular_Model\obj\Development\Model.asdatabase
+D:\Enterprise-SQL-Lab\analytics-tabular-reporting\ITSM_Tabular_Model\ITSM_Tabular_Model\obj\Development\Model.deploymentoptions
+D:\Enterprise-SQL-Lab\analytics-tabular-reporting\ITSM_Tabular_Model\ITSM_Tabular_Model\obj\Development\Model.deploymenttargets

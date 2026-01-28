@@ -1,0 +1,505 @@
+{
+  "name": "SemanticModel",
+  "compatibilityLevel": 1600,
+  "model": {
+    "culture": "en-US",
+    "dataSources": [
+      {
+        "type": "structured",
+        "name": "SQL/localhost;ITSM_Analytics",
+        "connectionDetails": {
+          "protocol": "tds",
+          "address": {
+            "server": "localhost",
+            "database": "ITSM_Analytics"
+          },
+          "authentication": null,
+          "query": null
+        },
+        "credential": {
+          "AuthenticationKind": "ServiceAccount",
+          "EncryptConnection": false
+        }
+      }
+    ],
+    "tables": [
+      {
+        "name": "DimCategory",
+        "columns": [
+          {
+            "name": "CategoryKey",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "CategoryKey"
+          },
+          {
+            "name": "TicketType",
+            "dataType": "string",
+            "sourceColumn": "TicketType"
+          },
+          {
+            "name": "Severity",
+            "dataType": "int64",
+            "sourceColumn": "Severity"
+          },
+          {
+            "name": "Team",
+            "dataType": "string",
+            "sourceColumn": "Team"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Partition",
+            "dataView": "full",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = #\"SQL/localhost;ITSM_Analytics\",",
+                "    dbo_DimCategory = Source{[Schema=\"dbo\",Item=\"DimCategory\"]}[Data]",
+                "in",
+                "    dbo_DimCategory"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "DimDate",
+        "columns": [
+          {
+            "name": "DateKey",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "DateKey"
+          },
+          {
+            "name": "FullDate",
+            "dataType": "dateTime",
+            "sourceColumn": "FullDate"
+          },
+          {
+            "name": "Year",
+            "dataType": "int64",
+            "sourceColumn": "Year"
+          },
+          {
+            "name": "Month",
+            "dataType": "int64",
+            "sourceColumn": "Month"
+          },
+          {
+            "name": "MonthName",
+            "dataType": "string",
+            "sourceColumn": "MonthName"
+          },
+          {
+            "name": "Day",
+            "dataType": "int64",
+            "sourceColumn": "Day"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Partition",
+            "dataView": "full",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = #\"SQL/localhost;ITSM_Analytics\",",
+                "    dbo_DimDate = Source{[Schema=\"dbo\",Item=\"DimDate\"]}[Data]",
+                "in",
+                "    dbo_DimDate"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "FactTickets",
+        "columns": [
+          {
+            "name": "TicketID",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "TicketID"
+          },
+          {
+            "name": "OpenDateKey",
+            "dataType": "int64",
+            "sourceColumn": "OpenDateKey"
+          },
+          {
+            "name": "CloseDateKey",
+            "dataType": "int64",
+            "sourceColumn": "CloseDateKey"
+          },
+          {
+            "name": "CategoryKey",
+            "dataType": "int64",
+            "isHidden": true,
+            "sourceColumn": "CategoryKey"
+          },
+          {
+            "name": "SLAHours",
+            "dataType": "int64",
+            "sourceColumn": "SLAHours"
+          },
+          {
+            "name": "ResolutionHours",
+            "dataType": "int64",
+            "sourceColumn": "ResolutionHours"
+          },
+          {
+            "name": "Status",
+            "dataType": "string",
+            "sourceColumn": "Status"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Partition",
+            "dataView": "full",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = #\"SQL/localhost;ITSM_Analytics\",",
+                "    dbo_FactTickets = Source{[Schema=\"dbo\",Item=\"FactTickets\"]}[Data]",
+                "in",
+                "    dbo_FactTickets"
+              ]
+            }
+          }
+        ],
+        "measures": [
+          {
+            "name": "Total Tickets",
+            "expression": "COUNTROWS(FactTickets)"
+          },
+          {
+            "name": "Avg Resolution Hours",
+            "expression": [
+              " AVERAGE(FactTickets[ResolutionHours])",
+              ""
+            ],
+            "formatString": "0.0"
+          },
+          {
+            "name": "SLA Breach Tickets",
+            "expression": [
+              " CALCULATE([Total Tickets], FactTickets[ResolutionHours] > FactTickets[SLAHours])",
+              ""
+            ],
+            "formatString": "0"
+          },
+          {
+            "name": "SLA Breach %",
+            "expression": [
+              " DIVIDE([SLA Breach Tickets], [Total Tickets])",
+              ""
+            ],
+            "formatString": "0.00%;-0.00%;0.00%",
+            "kpi": {
+              "targetExpression": "0.1",
+              "targetFormatString": "0.00%;-0.00%;0.00%",
+              "statusGraphic": "Traffic Light - Single",
+              "statusExpression": [
+                "var x='FactTickets'[SLA Breach %] return",
+                "            if(ISBLANK(x),BLANK(),",
+                "                    If(x<0.1,1,",
+                "\t                If(x<0.2,0,-1)",
+                "                )",
+                "            )",
+                "            "
+              ],
+              "annotations": [
+                {
+                  "name": "GoalType",
+                  "value": "StaticValue"
+                },
+                {
+                  "name": "KpiStatusType",
+                  "value": "LinearReversed"
+                },
+                {
+                  "name": "KpiThresholdType",
+                  "value": "Absolute"
+                },
+                {
+                  "name": "KpiThresholdOrdering",
+                  "value": "Ascending"
+                },
+                {
+                  "name": "KpiThresholdCount",
+                  "value": "2"
+                },
+                {
+                  "name": "KpiThreshold_0",
+                  "value": "0.1"
+                },
+                {
+                  "name": "KpiThreshold_1",
+                  "value": "0.2"
+                }
+              ]
+            }
+          },
+          {
+            "name": "High Severity Tickets",
+            "expression": [
+              " CALCULATE([Total Tickets], FILTER(DimCategory, DimCategory[Severity] IN {1,2}))",
+              ""
+            ]
+          },
+          {
+            "name": "High Severity Tickets %",
+            "expression": [
+              " DIVIDE([High Severity Tickets], [Total Tickets])",
+              ""
+            ],
+            "formatString": "0.00%;-0.00%;0.00%",
+            "kpi": {
+              "targetExpression": "0.3",
+              "targetFormatString": "0.00%;-0.00%;0.00%",
+              "statusGraphic": "Traffic Light - Single",
+              "statusExpression": [
+                "var x='FactTickets'[High Severity Tickets %] return",
+                "            if(ISBLANK(x),BLANK(),",
+                "                    If(x<0.3,1,",
+                "\t                If(x<0.4,0,-1)",
+                "                )",
+                "            )",
+                "            "
+              ],
+              "annotations": [
+                {
+                  "name": "GoalType",
+                  "value": "StaticValue"
+                },
+                {
+                  "name": "KpiStatusType",
+                  "value": "LinearReversed"
+                },
+                {
+                  "name": "KpiThresholdType",
+                  "value": "Absolute"
+                },
+                {
+                  "name": "KpiThresholdOrdering",
+                  "value": "Ascending"
+                },
+                {
+                  "name": "KpiThresholdCount",
+                  "value": "2"
+                },
+                {
+                  "name": "KpiThreshold_0",
+                  "value": "0.3"
+                },
+                {
+                  "name": "KpiThreshold_1",
+                  "value": "0.4"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "name": "3244b37e-19fc-498f-aa0e-cf1e467dad3f",
+        "fromTable": "FactTickets",
+        "fromColumn": "CloseDateKey",
+        "toTable": "DimDate",
+        "toColumn": "DateKey",
+        "isActive": false
+      },
+      {
+        "name": "2cb9299c-0e27-41fe-88b7-f8e94195f976",
+        "fromTable": "FactTickets",
+        "fromColumn": "CategoryKey",
+        "toTable": "DimCategory",
+        "toColumn": "CategoryKey"
+      },
+      {
+        "name": "b5f78bb1-4b7e-4fe8-866e-e4eb2a0f6648",
+        "fromTable": "FactTickets",
+        "fromColumn": "OpenDateKey",
+        "toTable": "DimDate",
+        "toColumn": "DateKey"
+      }
+    ],
+    "perspectives": [
+      {
+        "name": "IT Management",
+        "tables": [
+          {
+            "name": "DimCategory",
+            "columns": [
+              {
+                "name": "CategoryKey"
+              },
+              {
+                "name": "Severity"
+              },
+              {
+                "name": "Team"
+              },
+              {
+                "name": "TicketType"
+              }
+            ]
+          },
+          {
+            "name": "DimDate",
+            "columns": [
+              {
+                "name": "DateKey"
+              },
+              {
+                "name": "Day"
+              },
+              {
+                "name": "FullDate"
+              },
+              {
+                "name": "Month"
+              },
+              {
+                "name": "MonthName"
+              },
+              {
+                "name": "Year"
+              }
+            ]
+          },
+          {
+            "name": "FactTickets",
+            "measures": [
+              {
+                "name": "Avg Resolution Hours"
+              },
+              {
+                "name": "High Severity Tickets"
+              },
+              {
+                "name": "SLA Breach Tickets"
+              },
+              {
+                "name": "Total Tickets"
+              },
+              {
+                "name": "High Severity Tickets %"
+              },
+              {
+                "name": "SLA Breach %"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Operations",
+        "tables": [
+          {
+            "name": "DimCategory",
+            "columns": [
+              {
+                "name": "CategoryKey"
+              },
+              {
+                "name": "Severity"
+              },
+              {
+                "name": "Team"
+              },
+              {
+                "name": "TicketType"
+              }
+            ]
+          },
+          {
+            "name": "DimDate",
+            "columns": [
+              {
+                "name": "DateKey"
+              },
+              {
+                "name": "Day"
+              },
+              {
+                "name": "FullDate"
+              },
+              {
+                "name": "Month"
+              },
+              {
+                "name": "MonthName"
+              },
+              {
+                "name": "Year"
+              }
+            ]
+          },
+          {
+            "name": "FactTickets",
+            "columns": [
+              {
+                "name": "CategoryKey"
+              },
+              {
+                "name": "CloseDateKey"
+              },
+              {
+                "name": "OpenDateKey"
+              },
+              {
+                "name": "ResolutionHours"
+              },
+              {
+                "name": "SLAHours"
+              },
+              {
+                "name": "Status"
+              },
+              {
+                "name": "TicketID"
+              }
+            ],
+            "measures": [
+              {
+                "name": "Avg Resolution Hours"
+              },
+              {
+                "name": "High Severity Tickets"
+              },
+              {
+                "name": "SLA Breach Tickets"
+              },
+              {
+                "name": "Total Tickets"
+              },
+              {
+                "name": "High Severity Tickets %"
+              },
+              {
+                "name": "SLA Breach %"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "annotations": [
+      {
+        "name": "ClientCompatibilityLevel",
+        "value": "700"
+      }
+    ]
+  },
+  "id": "SemanticModel"
+}
